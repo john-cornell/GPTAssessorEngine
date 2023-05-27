@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using GPTEngine.Roles;
 
-namespace Lexicographer.Roles
+namespace AssessorEngine.Roles
 {
     internal abstract class SupervisedRole : RoleBehaviour
     {

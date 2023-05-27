@@ -1,4 +1,4 @@
-﻿namespace Lexicographer
+﻿namespace AssessorEngine
 {
     public class Class1
     {

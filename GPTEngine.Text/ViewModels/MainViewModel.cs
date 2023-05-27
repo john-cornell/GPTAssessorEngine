@@ -15,7 +15,9 @@ using System.Windows;
 using System.Windows.Input;
 using Microsoft.Extensions.Configuration;
 using System.IO;
-
+using Lexicographer.Roles;
+using AssessorEngine.Agents;
+using AssessorEngine.Roles;
 
 namespace GPTEngine.Text.ViewModels
 {
@@ -39,12 +41,18 @@ namespace GPTEngine.Text.ViewModels
                 .AddJsonFile("appsettings.json")
                 .Build();
 
+            string missionStatement = configuration["MissionStatement"];
+
             _gpt = new GPT(configuration["OpenApiKey"], configuration["Model"]);
 
             SendToGPT = new AsyncRelayCommand(SendToGPTHandlerAsync);
             RoleChangedCommand = new RelayCommand(OnRoleChanged);
 
             BuildRoles();
+
+            AgentLookup lookup = new AgentLookup();
+
+            Supervisor supervisor = new Supervisor(missionStatement, lookup);
 
             _history = new ObservableCollection<string>();
             PrintNextStatement();

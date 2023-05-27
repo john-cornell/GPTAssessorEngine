@@ -7,7 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GPTEngine", "GPTEngine\GPTE
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GPTEngine.Text", "GPTEngine.Text\GPTEngine.Text.csproj", "{3CB4F4CC-5BCF-4946-96DE-E2D0B24FCF73}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lexicographer", "Lexicographer\Lexicographer.csproj", "{23B4B26C-B640-40C6-8658-FD106B2BDDF6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AssessorEngine", "Lexicographer\AssessorEngine.csproj", "{23B4B26C-B640-40C6-8658-FD106B2BDDF6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

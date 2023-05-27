@@ -20,6 +20,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\GPTEngine\GPTEngine.csproj" />
+    <ProjectReference Include="..\Lexicographer\AssessorEngine.csproj" />
   </ItemGroup>
 
   <ItemGroup>

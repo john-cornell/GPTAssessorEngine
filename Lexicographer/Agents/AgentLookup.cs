@@ -5,15 +5,16 @@ using System.Text;
 using System.Threading.Tasks;
 using GPTEngine.Roles;
 
-namespace Lexicographer.Agents
+namespace AssessorEngine.Agents
 {
     public class AgentLookup
-    { 
+    {
         List<RoleBehaviour> _agents;
 
-        public AgentLookup()
+        public AgentLookup(params RoleBehaviour[] agents)
         {
             _agents = new List<RoleBehaviour>();
+            AddAgents(agents);
         }
 
         public void AddAgent(RoleBehaviour agent)
