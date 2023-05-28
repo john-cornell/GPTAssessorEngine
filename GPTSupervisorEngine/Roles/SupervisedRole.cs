@@ -7,8 +7,8 @@ using GPTEngine.Roles;
 
 namespace AssessorEngine.Roles
 {
-    internal abstract class SupervisedRole : RoleBehaviour
+    public abstract class SupervisedRole : RoleBehaviour
     {
-
+        public string RoleStatement { get; set; }
     }
 }

@@ -1,5 +1,4 @@
 ﻿using GPTEngine.Roles;
-using GPTEngine.Roles.Types;
 using GPTEngine.Text.WPFCommand;
 using System;
 using System.Collections.Generic;
@@ -15,25 +14,32 @@ using System.Windows;
 using System.Windows.Input;
 using Microsoft.Extensions.Configuration;
 using System.IO;
-using Lexicographer.Roles;
+using GPTSupervisorEngine.Roles;
 using AssessorEngine.Agents;
+using Lexicographer.Agents;
 using AssessorEngine.Roles;
+using System.Text.RegularExpressions;
 
 namespace GPTEngine.Text.ViewModels
 {
     public class MainViewModel : INotifyPropertyChanged
     {
+        int MAX_ITERATIONS = 10;
+
         Conversation _step1, _step2;
         GPT _gpt;
 
         private ObservableCollection<string> _history;
 
-        public List<RoleBehaviour> Roles { get; private set; }        
+        public List<RoleBehaviour> Roles { get; private set; }
 
         public ICommand RoleChangedCommand { get; private set; }
 
         public ICommand SendToGPT { get; set; }
+        string _missionStatement;
+        Conversation _supervisor;
 
+        AgentLookup _agents;
         public MainViewModel()
         {
             IConfiguration configuration = new ConfigurationBuilder()
@@ -41,98 +47,111 @@ namespace GPTEngine.Text.ViewModels
                 .AddJsonFile("appsettings.json")
                 .Build();
 
-            string missionStatement = configuration["MissionStatement"];
+            _missionStatement = configuration["MissionStatement"];
 
             _gpt = new GPT(configuration["OpenApiKey"], configuration["Model"]);
 
-            SendToGPT = new AsyncRelayCommand(SendToGPTHandlerAsync);
-            RoleChangedCommand = new RelayCommand(OnRoleChanged);
-
-            BuildRoles();
-
-            AgentLookup lookup = new AgentLookup();
-
-            Supervisor supervisor = new Supervisor(missionStatement, lookup);
-
             _history = new ObservableCollection<string>();
-            PrintNextStatement();
+            _agents = new AgentLookup(_gpt);
 
-            ResetConversation();
+            _agents.RoleAssigned += (s, RoleAssignation) => History.Add(RoleAssignation);
+            _agents.SummarisationCompleted += async (s, e) =>
+             {
+                 History.Add("Summarisation Completed");
+                 await SetupSupervisorAsync();
+
+                 ShowInput = true;
+                 OnPropertyChanged(nameof(ShowInput));
+             };
+
+            History.Add("Loading ... please wait");
+
+            Activate();
+
+            SendToGPT = new AsyncRelayCommand(SendToGPTHandlerAsync);
         }
 
-        private void PrintNextStatement()
-        {
-            History.Add("Please enter a word to define, and press Send (or simply hit [Enter]):");
-        }
+        public bool ShowInput { get; set; } = false;
 
-        private void ResetConversation()
+        private async Task SendToGPTHandlerAsync(object arg)
         {
-            _step1 = new Conversation(
-                Roles[(int)ContentType.LyingLexicographer].As(RoleType.System),
-                Roles[(int)ContentType.LyingLexicographer].As(RoleType.Assistant),
-                Roles[(int)ContentType.LyingLexicographer].ResetEachTime
-                );
+            string input = Input;
 
-            _step2 = new Conversation(
-                Roles[(int)ContentType.LexicographicEditor].As(RoleType.System),
-                Roles[(int)ContentType.LexicographicEditor].As(RoleType.Assistant),
-                Roles[(int)ContentType.LexicographicEditor].ResetEachTime
-                );
-        }
+            _supervisor.AddMessage($"Instruct your agents to define {input}");
+            History.Add($"Instruct your agents to define {input}");
+            var response = await _gpt.Call(_supervisor);
 
-        private void BuildRoles()
-        {
-            Roles = new List<RoleBehaviour>
+            int iterations = 0;
+
+            while (!response.Response.Trim().ToUpper().StartsWith("OUT") && iterations++ < MAX_ITERATIONS)
             {
-                
-                new ArchitectAssistantRole(),
-                new BiasedIdiot(),
-                new GiftedSongwriter(),
-                new KidsAuthor(),
-                new Poet(),
-                new Chef(),
-                new Superhero(),
-                new FakeLexicographer(),
-                new LexicographicEditor(),
-            };
+                string nextMessage = "Oops, something went wrong";
 
-            SortRoleBehaviours(Roles);
+                History.Add(response.Response);
+                if (response.IsError) return;
 
-            SelectedIndex = 0;
-        }
 
-        public static void SortRoleBehaviours(List<RoleBehaviour> roles)
-        {
-            roles.Sort((role1, role2) => role1.ContentType.CompareTo(role2.ContentType));
-        }
+                if (response.Response.Trim().ToUpper().StartsWith("CALL"))
+                {
+                    nextMessage = "Oops, someting went wrong";
 
-        private async Task SendToGPTHandlerAsync(object parameter)
-        {
-            _step1.AddMessage(Input);
-            History.Add(Input);
-            Input=string.Empty;
+                    string text = response.Response.Substring(response.Response.IndexOf(' ') + 1);
 
-            History.Add("    > Looking up definition ...");
+                    string agentNameRaw = text.Split(' ')[0];
 
-            GPTResponse response1 = await _gpt.Call(_step1);
-            
-            if (response1.IsError) History.Add($"Error: {response1.Error}");
-            else
-            {
-                //History.Add(response1.Response);
-                _step2.AddMessage(response1.Response);
+                    string responseText = text.Substring(agentNameRaw.Length + 1).Trim();
+
+                    string agentName = Regex.Replace(agentNameRaw, "[^a-zA-Z0-9]", "");
+                    var agent = _agents.GetAgent(agentName);
+
+                    if (agent != null)
+                    {
+                        var convo = new Conversation(agent);
+                        convo.AddMessage(input);
+
+                        var agentResponse = await _gpt.Call(convo);
+                        History.Add(agentResponse.Response);
+                        nextMessage = $"Agent {agent.Name} responded: {agentResponse.Response}";
+                        input = agentResponse.Response;
+                    }
+                    else
+                    {
+                        nextMessage = $"Agent {agentName} not found";
+                    }
+                }
+                else
+                {
+                    nextMessage = "THE ONLY THINGS you may only output are 1) CALL (Agent's name) (with a Prompt), OR, 2) OUT: (with the output). DO NOT ANSWER THIS BY APOLOGISING OR MAKING ANY OTHER STATEMENT BUT THOSE 2. If the agent has completed the task reply OUT: with its output ";
+                }
+
+                _supervisor.AddMessage(nextMessage);
+                History.Add($"> {nextMessage}");
+                response = await _gpt.Call(_supervisor);
             }
-
-            History.Add("    > Thinking of a response ...");
-
-            GPTResponse response2 = await _gpt.Call(_step2);
-
-            if (response2.IsError) History.Add($"Error: {response2.Error}");
-            else History.Add(response2.Response);
-
-            History.Add("-------------------------------------------------");
-            PrintNextStatement();
+            History.Add(response.Response);
+            History.Add("Complete");
         }
+
+        private async Task SetupSupervisorAsync()
+        {
+            _supervisor = new Conversation(
+                new Role(RoleType.System, RoleBehaviour.Create(_missionStatement)),
+                new Supervisor(_missionStatement, _agents).As(RoleType.Assistant),
+                false);            
+        }
+
+
+
+        public async Task Activate()
+        {
+            ShowInput = false;
+            OnPropertyChanged(nameof(ShowInput));
+
+            await _agents.AddAgentsAsync(
+                new Definer(), new Editor()
+                );
+        }
+
 
         private void OnRoleChanged(object parameter)
         {
@@ -140,14 +159,12 @@ namespace GPTEngine.Text.ViewModels
                 History.Count > 0 &&
                 MessageBox.Show("Clear conversation?", "Are you sure", MessageBoxButton.YesNo) != MessageBoxResult.Yes) return;
 
-            ResetConversation();
-
             History.Clear();
 
 
         }
         private string _input = string.Empty;
-        
+
         public string Input
         {
             get { return _input; }

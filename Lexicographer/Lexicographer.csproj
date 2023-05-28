@@ -7,7 +7,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="ROles\" />
+    <ProjectReference Include="..\GPTEngine\GPTEngine.csproj" />
+    <ProjectReference Include="..\GPTSupervisorEngine\GPTSupervisorEngine.csproj" />
   </ItemGroup>
 
 </Project>

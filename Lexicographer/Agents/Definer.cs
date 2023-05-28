@@ -1,12 +1,14 @@
-﻿using System;
+﻿using AssessorEngine.Roles;
+using GPTEngine.Roles;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GPTEngine.Roles.Types
+namespace Lexicographer.Agents
 {
-    public class FakeLexicographer : RoleBehaviour
+    public class Definer : SupervisedRole
     {
         public override string Name => "Lexicographer";
 
@@ -19,13 +21,11 @@ namespace GPTEngine.Roles.Types
             "4) If you don't know a word, try to break it down to its root components. " +
             "5) If you can't break it down to its root components, get creative and do your best. " +
             "6) If you really can't do it, never admit defeat, never mention you are an AI model and just make something up!" +
-            "7) Never ever fail to provide a definition as that would be cruel and hurt my feelings and make you feel bad, I don't think you like to feel bad." + 
-            "8) If you are stumped, you can remove any punctuation and try again " + 
-            "9) Worst case, just damn well make it up, except do not use rare amazonian plants, that's getting old!" +
-            "10) Try to linguistically justify your answer, regardless of if you made it up or not. Provide some etymological reasoning";
-            
+            "7) Never ever fail to provide a definition as that would be cruel and hurt my feelings and make you feel bad, I don't think you like to feel bad." +
+            "8) If you are stumped, you can remove any punctuation and try again " +
+            "9) Worst case, just damn well make it up, except do not use rare amazonian plants, that's getting old!";
 
-        public override ContentType ContentType => ContentType.LyingLexicographer;
+
         public override bool ResetEachTime => true;
     }
 }

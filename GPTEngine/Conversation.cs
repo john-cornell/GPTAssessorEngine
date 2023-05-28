@@ -8,6 +8,12 @@ namespace GPTEngine
         bool _resetEachMessage;
         Role _system;
         Role _assistant;
+
+        public Conversation(RoleBehaviour role) : this(role.As(RoleType.System), role.As(RoleType.Assistant), role.ResetEachTime)
+        {
+            
+        }
+
         public Conversation(Role system, Role assistant, bool resetEachMessage)
         {
             _resetEachMessage = resetEachMessage;
@@ -30,7 +36,8 @@ namespace GPTEngine
 
         private void ResetMessages()
         {
-            _messages = new List<GPTMessage>() { _system.GetSetupMessage(), _assistant.GetSetupMessage() };
+            _messages = new List<GPTMessage>() { _system.GetSetupMessage() };
+            if (_messages[0].Content != _assistant.GetSetupMessage().Content) _messages.Add(_assistant.GetSetupMessage());
         }
 
         public void AddMessage(string message)

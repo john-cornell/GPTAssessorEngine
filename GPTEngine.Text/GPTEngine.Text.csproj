@@ -20,7 +20,9 @@
 
   <ItemGroup>
     <ProjectReference Include="..\GPTEngine\GPTEngine.csproj" />
+    <ProjectReference Include="..\GPTSupervisorEngine\GPTSupervisorEngine.csproj" />
     <ProjectReference Include="..\Lexicographer\AssessorEngine.csproj" />
+    <ProjectReference Include="..\Lexicographer\Lexicographer.csproj" />
   </ItemGroup>
 
   <ItemGroup>

@@ -12,8 +12,7 @@ namespace AssessorEngine.Roles
         public Assessor(string missionStatement)
         {
             MissionStatement = missionStatement;
-        }
-        public override ContentType ContentType => ContentType.Assessor;
+        }        
         public override string Name => "Assessor";
 
         public override string Content =>

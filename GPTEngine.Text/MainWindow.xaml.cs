@@ -24,7 +24,8 @@ namespace GPTEngine.Text
         public MainWindow()
         {
             DataContext = new MainViewModel();
+            
             InitializeComponent();
-        }
+        }        
     }
 }
