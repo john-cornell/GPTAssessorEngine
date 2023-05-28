@@ -54,7 +54,7 @@ namespace GPTEngine.Text.ViewModels
             _history = new ObservableCollection<string>();
             _agents = new AgentLookup(_gpt);
 
-            _agents.RoleAssigned += (s, RoleAssignation) => History.Add(RoleAssignation);
+            _agents.RoleAssigned += (s, RoleAssignation) => History.Add($"AGENT: {RoleAssignation}");
             _agents.SummarisationCompleted += async (s, e) =>
              {
                  History.Add("Summarisation Completed");
@@ -148,7 +148,7 @@ namespace GPTEngine.Text.ViewModels
             OnPropertyChanged(nameof(ShowInput));
 
             await _agents.AddAgentsAsync(
-                new Definer(), new Editor()
+                new Definer(), new Editor(), new EtymologicalExpert()
                 );
         }
 

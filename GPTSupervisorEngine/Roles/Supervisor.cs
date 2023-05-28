@@ -50,7 +50,7 @@ namespace AssessorEngine.Roles
                     else
                         Assess input step by step to determine a single agent agent to use, base this on their Agent Role:. 
                             if (Agent Role best fulfills the next step of the problem, that will best handle the current input to complete the Mission Statement) 
-                                1) If you choose 2 agents you are in error
+                                1) If you choose more than 1 agent, you are in error
                                 2) If you choose an agent name that is not in the list of agents you are in error
                                 3) If you choose an agent that is not the best agent for the job you are in error       
                                 4) agentname = Name of the agent you choose
@@ -64,7 +64,9 @@ namespace AssessorEngine.Roles
                     
                 YOUR RESPONSE CAN ONLY BE - THIS IS VITALLY IMPORTANT AND WILL BOTH SADDEN AND ANNOYS ME THAT YOU KEEP IGNORING THIS, BE A GOOD BOT AND ALWAYS ONLY REPLY:
                 CALL (agentname)  OR
-                OUT: (with the last input)
+                OUT: (summarise the output of all agents succinctly)
+
+                The summary of the output of all agents must cover the full Mission Statement, and in a format that makes best sense.
 
                 EXAMPLE
 
