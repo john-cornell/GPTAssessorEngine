@@ -7,12 +7,15 @@
         Title="Definorator"
         Height="450"
         Width="800">
+    <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
+    </Window.Resources>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-        <Border Visibility="{Binding ShowInput}" Grid.Row="0" Padding="5" Margin="7,5,3,5" CornerRadius="10" BorderBrush="LightGray" BorderThickness="1">
+        <Border Visibility="{Binding ShowInput, Converter={StaticResource BoolToVisibilityConverter}}" Grid.Row="0" Padding="5" Margin="7,5,3,5" CornerRadius="10" BorderBrush="LightGray" BorderThickness="1">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="*"/>
